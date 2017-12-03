@@ -1,0 +1,24 @@
+{
+  "name": "liri-node-app",
+  "version": "0.0.1",
+  "description": "Command Line App that uses twitter, spotify and other apis to return information to the user",
+  "main": "liri.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abreaw/liri-node-app.git"
+  },
+  "author": "Brea Torres",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abreaw/liri-node-app/issues"
+  },
+  "homepage": "https://github.com/abreaw/liri-node-app#readme",
+  "dependencies": {
+    "node-spotify-api": "^1.0.7",
+    "request": "^2.83.0",
+    "twitter": "^1.7.1"
+  }
+}
