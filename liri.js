@@ -32,7 +32,7 @@ var keyInfo = require("./keys.js");
 
 // grab npm packages that will be needed to run this node.js app
 var fs = require("fs");		// needed for file read / write
-var Twitter = require("twitter");	// needed to use the twitter package to get last 20 tweets
+// var Twitter = require("twitter");	// needed to use the twitter package to get last 20 tweets
 // var Spotify = require('node-spotify-api');	// needed to use the spotify package to get the song information
 
 // grab input from command line node app call
@@ -69,6 +69,8 @@ switch(userInput[2]) {
 
 function getTwitterStatus() {
 
+	var Twitter = require("twitter");	// needed to use the twitter package to get last 20 tweets
+
 	// create new client session w/ Twitter and use keys.js info from test account
 	var client = new Twitter({
 		consumer_key: keyInfo.consumer_key,
@@ -78,8 +80,8 @@ function getTwitterStatus() {
 	});
 
 	// add twitter user account (screen name) information needed to access the client get function
-	var params = {screen_name: 'nodejs'};	// using the default account information from the npm documentation
-	// var params = {screen_name: 'BtTest1117'};  // using my test account information
+	// var params = {screen_name: 'nodejs'};	// using the default account information from the npm documentation
+	var params = {screen_name: 'BtTest1117'};  // using my test account information
 
 	// use the Twitter client to get the latest tweets from the user account
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
@@ -174,53 +176,95 @@ function getSongInfo(songName) {
 
 		// added this JSON.stringify function to be able to read all the objects / data being returned from the search query above
 		// console.log(JSON.stringify(data, null, 2));
-
 		// console.log(JSON.stringify(data.tracks.items[0].album, null, 2));
 
 		console.log("there are " + data.tracks.items.length + " items in the response from spotify");
 		var spotifySongChoices = [];
+		var isSong = false;
+		var itemIndex;
 
+		// loop through to check for an exact match first
 		for (var i = 0; i < data.tracks.items.length; i++) {
-			// console.log("in the for loop ");
+			// console.log("in 1st for loop ");
 			// console.log("Item " + i + ": " + data.tracks.items[i].name);
 			// console.log("Album Name: " + data.tracks.items[i].album.name);
 
-			var songTitle = data.tracks.items[i].name;
-			var songTitleCk  = songTitle.toUpperCase();
-			var songNameCk = songName.toUpperCase();
+			var songTitle1 = data.tracks.items[i].name;
+			var songTitleCk1  = songTitle1.toUpperCase();
+			var songNameCk1 = songName.toUpperCase();
 			// console.log(songTitle);
-			var isSong = songTitleCk.includes(songNameCk);
 
-			// check to see if the current item in the response is the right song title
-			if (isSong) {
+			// check for exact match from spotify response
+			if (songNameCk1 === songTitleCk1) {
 
-				console.log("song titles match at this point");
-				console.log("response: " + songTitle + " & user input: " + songName);
-
-				var artist = data.tracks.items[i].album.artists[0].name;
-				// var songTitle = data.tracks.items[0].name;
-				var album = data.tracks.items[i].album.name;
-				var previewLink = data.tracks.items[i].album.artists[0].external_urls.spotify;
-
-
-				console.log("----------------------------------------------------------------------------------");
-				console.log("Artist:    " + artist);
-				console.log("Song Name: " + songTitle);
-				console.log("Album:     " + album);
-				console.log("Check it out at: " + previewLink);
-				console.log("----------------------------------------------------------------------------------");
-
-				return;
-			} else {
-
-				spotifySongChoices.push(data.tracks.items[i].name);
+				// console.log("exact match found");
+				// console.log("response: " + songTitle1 + " & user input: " + songName);
+				isSong = true;
+				itemIndex = i;
+				// console.log(JSON.stringify(data.tracks.items[i], null, 2));
+				break;	// added break to get out of loop when 1st exact match found
 			}
 			
 		}
 
-		console.log("isSong = " + isSong);
-		console.log("Could it be one of these?");
-		console.log(spotifySongChoices);
+		// if no exact match found
+		if (!isSong) {
+
+			// loop through to check for a close match
+			for (var j = 0; j < data.tracks.items.length; j++) {
+				// console.log("in 2nd for loop ");
+				// console.log("Item " + i + ": " + data.tracks.items[i].name);
+				// console.log("Album Name: " + data.tracks.items[i].album.name);
+
+				var songTitle2 = data.tracks.items[j].name;
+				var songTitleCk2  = songTitle2.toUpperCase();
+				var songNameCk2 = songName.toUpperCase();
+				// console.log(songTitle);
+
+				// check to see if the song name from the user input is part of the title from the spotify response
+				isSong = songTitleCk2.includes(songNameCk2);
+
+				// check to see if the current item in the response is the right song title
+				if (isSong) {
+
+					console.log("partial match found");
+					console.log("response: " + songTitle2 + " & user input: " + songName);
+					itemIndex = j;
+					break;	// added break to get out of loop when 1st partial match found
+
+				} else {
+
+					spotifySongChoices.push(data.tracks.items[j].name);
+				}
+			
+			}
+
+		}
+
+		// check to see if a song was found in the 2 checks being done
+		if (isSong) {
+
+			var artist = data.tracks.items[itemIndex].album.artists[0].name;
+			var songTitle = data.tracks.items[itemIndex].name;
+			var album = data.tracks.items[itemIndex].album.name;
+			// var previewLink = data.tracks.items[itemIndex].album.artists[0].external_urls.spotify;
+			
+
+
+			console.log("----------------------------------------------------------------------------------");
+			console.log("Artist:    " + artist);
+			console.log("Song Name: " + songTitle);
+			console.log("Album:     " + album);
+			console.log("Check it out at: " + previewLink);
+			console.log("----------------------------------------------------------------------------------");
+
+		} else {
+
+			console.log("isSong = " + isSong);
+			console.log("Could it be one of these?");
+			console.log(spotifySongChoices);
+		}
+
 	});
 
 }
