@@ -247,9 +247,14 @@ function getSongInfo(songName) {
 			var artist = data.tracks.items[itemIndex].album.artists[0].name;
 			var songTitle = data.tracks.items[itemIndex].name;
 			var album = data.tracks.items[itemIndex].album.name;
-			var previewLink = data.tracks.items[itemIndex].album.artists[0].external_urls.spotify;
-			
+			// var previewLink = data.tracks.items[itemIndex].album.artists[0].external_urls.spotify;
+			var previewLink = data.tracks.items[itemIndex].preview_url;
 
+			// check to see if preview link is null
+			if (previewLink === null) {
+
+				previewLink = "Sorry no link available at this time."
+			}
 
 			console.log("----------------------------------------------------------------------------------");
 			console.log("Artist:    " + artist);
