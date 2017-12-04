@@ -73,13 +73,47 @@ function getTwitterStatus() {
 	});
 
 	// add twitter user account (screen name) information needed to access the client get function
-	// var params = {screen_name: 'nodejs'};	// using the default account information from the npm documentation
-	var params = {screen_name: 'BtTest1117'};  // using my test account information
+	var params = {screen_name: 'nodejs'};	// using the default account information from the npm documentation
+	// var params = {screen_name: 'BtTest1117'};  // using my test account information
 
 	// use the Twitter client to get the latest tweets from the user account
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
+	  // test if an error occurs
+	  // error = true;
 	  if (!error) {
-	    console.log(tweets);
+		// console.log(tweets);  // shows full tweet array that comes back from the get function call
+		// console.log(tweets[0].created_at);	// test array dot notation to grab tweets from get function call
+		// console.log(tweets[0].text);	// test array dot notation to grab tweets from get function call
+
+		console.log("----------------------------------------------------------------------------------");
+		console.log("Latest Tweets for ***" + params.screen_name + "***");
+		console.log("----------------------------------------------------------------------------------");
+		
+		// create a variable to limit the tweet output to 20
+		var loopLimit;
+
+		// check to see if there are twenty or more tweets in the account being used
+		// might not need this ... looks like the get function only returns 20 tweets at a time anyway
+		if (tweets.length >= 20) {
+			loopLimit = 20;
+		} else {
+			loopLimit = tweets.length;
+		}
+
+		// check to see if the loop limit is correct
+		// console.log("going to loop through " + loopLimit);
+		// console.log("tweets amt = " + tweets.length);
+
+	    // loop through 
+	    for (var i = 0; i < loopLimit; i++) {
+	    
+	    	console.log("\"" + tweets[i].text + "\"");	// test array dot notation to grab tweets from get function call
+			console.log("Tweeted on: " + tweets[i].created_at);	// test array dot notation to grab tweets from get function call
+			console.log("----------------------------------------------------------------------------------");
+	    }
+
+	  } else {
+	  	console.log("Issue getting the latest tweets, please try back later.");
 	  }
 	});
 
