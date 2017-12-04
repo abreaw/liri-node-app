@@ -247,7 +247,7 @@ function getSongInfo(songName) {
 			var artist = data.tracks.items[itemIndex].album.artists[0].name;
 			var songTitle = data.tracks.items[itemIndex].name;
 			var album = data.tracks.items[itemIndex].album.name;
-			// var previewLink = data.tracks.items[itemIndex].album.artists[0].external_urls.spotify;
+			var previewLink = data.tracks.items[itemIndex].album.artists[0].external_urls.spotify;
 			
 
 
