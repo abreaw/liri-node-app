@@ -41,28 +41,43 @@ var userInput = process.argv;
 // check to see if command line input coming in properly
 // console.log(userInput);
 
-// check to see which function requested by user from command line input
-switch(userInput[2]) {
-    case "my-tweets":
-    	console.log("getting tweets");
-        getTwitterStatus();
-        break;
+// call function to check / execute the right commands passed in by the user
+executeLIRICommand(userInput[2], userInput[3]);
 
-    case "spotify-this-song":
-        console.log("getting song data");
-        getSongInfo(userInput[3]);
-        break;
 
-    case "movie-this":
-    	console.log("getting movie info");
-    	getMovieInfo(userInput[3]);
-    	break;
 
-    default:
-        console.log("what do you want to do? you didn't enter any commands I recognize to help you");
+// ----------------------------------------------------------------------------------------------------------------------------------------------
+// check the command and the information that the user and execute the right function
+// ----------------------------------------------------------------------------------------------------------------------------------------------
+function executeLIRICommand(cmdType, titleInfo) {
+
+	// check to see which function requested by user from command line input
+	switch(cmdType) {
+	    case "my-tweets":
+	    	console.log("getting tweets");
+	        getTwitterStatus();
+	        break;
+
+	    case "spotify-this-song":
+	        console.log("getting song data");
+	        getSongInfo(titleInfo);
+	        break;
+
+	    case "movie-this":
+	    	console.log("getting movie info");
+	    	getMovieInfo(titleInfo);
+	    	break;
+
+	    case "do-what-it-says":
+	    	console.log("getting file data");
+	    	getFileInfo();
+	    	break;
+
+	    default:
+	        console.log("what do you want to do? you didn't enter any commands I recognize to help you");
+	}
+
 }
-
-
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 // need this code for the twitter status information
@@ -126,12 +141,6 @@ function getTwitterStatus() {
 	});
 
 }
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------
-// need this code for the twitter status information
-// ----------------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 
 
@@ -275,10 +284,6 @@ function getSongInfo(songName) {
 
 }
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------
-// need this code for the spotify query to work
-// ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
@@ -357,9 +362,33 @@ function getMovieInfo(movieName) {
 
 }
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------
-// need this code for the omdb query to work
-// ----------------------------------------------------------------------------------------------------------------------------------------------
 
 
+// ----------------------------------------------------------------------------------------------------------------------------------------------
+// need this code for the file read to work
+// ----------------------------------------------------------------------------------------------------------------------------------------------
+
+function getFileInfo() {
+
+	// grab npm packages that will be needed to run this node.js app
+	var fs = require("fs");		// needed for file read / write
+
+	// read the random.txt file and execute the right process based on file input
+	fs.readFile("random.txt", "utf8", function(err, data) {
+		if (err) {
+			return console.log("Error when reading random.txt file: " + err);
+		}
+
+		var dataArr = data.split(",");
+
+		console.log(dataArr);
+
+		// take out double quotes since the data.split function puts it into the array as a string already
+		var noQuotesVersion = dataArr[1].replace(/"/g,"");
+		// console.log(noQuotesVersion);
+
+		executeLIRICommand(dataArr[0], noQuotesVersion);
+	});
+
+}
 
