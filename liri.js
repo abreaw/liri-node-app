@@ -1,21 +1,11 @@
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
 // app will take in the following type of commands from the user (command line)
-// my-tweets ... will show your last 20 tweets and when they were created in gitbash (cmd line interface)
-// spotify-this-song ... node liri.js spotify-this-song '<song name here>' ... will show the following information about the song
-	// artist, song name, preview link of the song from spotify, album that the song is from
-	// if there is no song then program will default to "The Sign" by Ace of Base
-// movie-this ... node liri.js movie-this '<movie name here>' ... will show the following information about the movie in the command line view
-	// * Title of the movie.
-	// * Year the movie came out.
-	// * IMDB Rating of the movie.
-	// * Rotten Tomatoes Rating of the movie.
-	// * Country where the movie was produced.
-	// * Language of the movie.
-	// * Plot of the movie.
-	// * Actors in the movie.
-	// Default to Mr. Nobody if no movie information added by the user
-// do-what-it-says ... node liri.js do-what-it-says ... read in random.txt file and do whatever commands are in the file
+
+// my-tweets 			node liri.js my-tweets
+// spotify-this-song	node liri.js spotify-this-song '<song name here>'
+// movie-this			node liri.js movie-this '<movie name here>'
+// do-what-it-says		node liri.js do-what-it-says
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -23,23 +13,8 @@
 // Gets the twitter key info from the keys.js file
 var keyInfo = require("./keys.js");
 
-// keys info loading from keys.js file
-// console.log(keyInfo);
-
-// keys dot notation working to assign the individual key information to the calls
-// console.log(keyInfo.consumer_key);
-
-
-// grab npm packages that will be needed to run this node.js app
-var fs = require("fs");		// needed for file read / write
-// var Twitter = require("twitter");	// needed to use the twitter package to get last 20 tweets
-// var Spotify = require('node-spotify-api');	// needed to use the spotify package to get the song information
-
 // grab input from command line node app call
 var userInput = process.argv;
-
-// check to see if command line input coming in properly
-// console.log(userInput);
 
 // call function to check / execute the right commands passed in by the user
 executeLIRICommand(userInput[2], userInput[3]);
@@ -79,8 +54,12 @@ function executeLIRICommand(cmdType, titleInfo) {
 
 }
 
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 // need this code for the twitter status information
+
+// my-tweets ... will show your last 20 tweets and when they were created in gitbash (cmd line interface)
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
 function getTwitterStatus() {
@@ -101,13 +80,8 @@ function getTwitterStatus() {
 
 	// use the Twitter client to get the latest tweets from the user account
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
-	  // test if an error occurs
-	  // error = true;
 	  if (!error) {
-		// console.log(tweets);  // shows full tweet array that comes back from the get function call
-		// console.log(tweets[0].created_at);	// test array dot notation to grab tweets from get function call
-		// console.log(tweets[0].text);	// test array dot notation to grab tweets from get function call
-
+	
 		console.log("----------------------------------------------------------------------------------");
 		console.log("Latest Tweets for ***" + params.screen_name + "***");
 		console.log("----------------------------------------------------------------------------------");
@@ -123,11 +97,7 @@ function getTwitterStatus() {
 			loopLimit = tweets.length;
 		}
 
-		// check to see if the loop limit is correct
-		// console.log("going to loop through " + loopLimit);
-		// console.log("tweets amt = " + tweets.length);
-
-	    // loop through 
+		// loop through tweets information and process to screen
 	    for (var i = 0; i < loopLimit; i++) {
 	    
 	    	console.log("\"" + tweets[i].text + "\"");	// test array dot notation to grab tweets from get function call
@@ -136,7 +106,9 @@ function getTwitterStatus() {
 	    }
 
 	  } else {
+
 	  	console.log("Issue getting the latest tweets, please try back later.");
+
 	  }
 	});
 
@@ -158,19 +130,11 @@ function getSongInfo(songName) {
 	// adding spotify npm package functions to the node.js app for use
 	var Spotify = require('node-spotify-api');
 
-	// tried using the keys file for the spotify id / secret info too ... didn't work ... have to break this out into another file to use this way
-	// var spotify = new Spotify({
-	// 	id: keyInfo.id,
-	// 	secret: keyInfo.secret,
-	// });
-
 	// using documentation from npm package to setup the new Spotify object
 	var spotify = new Spotify({
 		id: 'd4df910b75c3467e80e7e5628d46c06c',
 		secret: 'e8994c65cc5f422ca980f5ce049ee573',
 	});
-
-	// console.log(songName);
 
 	// if user does not add a song title to search for then app will add one for them in the search query request
     if (songName === undefined) {
@@ -195,23 +159,16 @@ function getSongInfo(songName) {
 
 		// loop through to check for an exact match first
 		for (var i = 0; i < data.tracks.items.length; i++) {
-			// console.log("in 1st for loop ");
-			// console.log("Item " + i + ": " + data.tracks.items[i].name);
-			// console.log("Album Name: " + data.tracks.items[i].album.name);
-
+			
 			var songTitle1 = data.tracks.items[i].name;
 			var songTitleCk1  = songTitle1.toUpperCase();
 			var songNameCk1 = songName.toUpperCase();
-			// console.log(songTitle);
-
+			
 			// check for exact match from spotify response
 			if (songNameCk1 === songTitleCk1) {
 
-				// console.log("exact match found");
-				// console.log("response: " + songTitle1 + " & user input: " + songName);
 				isSong = true;
 				itemIndex = i;
-				// console.log(JSON.stringify(data.tracks.items[i], null, 2));
 				break;	// added break to get out of loop when 1st exact match found
 			}
 			
@@ -222,23 +179,17 @@ function getSongInfo(songName) {
 
 			// loop through to check for a close match
 			for (var j = 0; j < data.tracks.items.length; j++) {
-				// console.log("in 2nd for loop ");
-				// console.log("Item " + i + ": " + data.tracks.items[i].name);
-				// console.log("Album Name: " + data.tracks.items[i].album.name);
-
+			
 				var songTitle2 = data.tracks.items[j].name;
 				var songTitleCk2  = songTitle2.toUpperCase();
 				var songNameCk2 = songName.toUpperCase();
-				// console.log(songTitle);
-
+			
 				// check to see if the song name from the user input is part of the title from the spotify response
 				isSong = songTitleCk2.includes(songNameCk2);
 
 				// check to see if the current item in the response is the right song title
 				if (isSong) {
 
-					console.log("partial match found");
-					console.log("response: " + songTitle2 + " & user input: " + songName);
 					itemIndex = j;
 					break;	// added break to get out of loop when 1st partial match found
 
@@ -257,13 +208,13 @@ function getSongInfo(songName) {
 			var artist = data.tracks.items[itemIndex].album.artists[0].name;
 			var songTitle = data.tracks.items[itemIndex].name;
 			var album = data.tracks.items[itemIndex].album.name;
-			// var previewLink = data.tracks.items[itemIndex].album.artists[0].external_urls.spotify;
 			var previewLink = data.tracks.items[itemIndex].preview_url;
 
 			// check to see if preview link is null
 			if (previewLink === null) {
 
 				previewLink = "Sorry no link available at this time."
+			
 			}
 
 			console.log("----------------------------------------------------------------------------------");
@@ -366,6 +317,9 @@ function getMovieInfo(movieName) {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 // need this code for the file read to work
+
+// do-what-it-says ... node liri.js do-what-it-says ... read in random.txt file and do whatever commands are in the file
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
 function getFileInfo() {
@@ -381,11 +335,8 @@ function getFileInfo() {
 
 		var dataArr = data.split(",");
 
-		console.log(dataArr);
-
 		// take out double quotes since the data.split function puts it into the array as a string already
 		var noQuotesVersion = dataArr[1].replace(/"/g,"");
-		// console.log(noQuotesVersion);
 
 		executeLIRICommand(dataArr[0], noQuotesVersion);
 	});
