@@ -55,6 +55,7 @@ switch(userInput[2]) {
 
     case "movie-this":
     	console.log("getting movie info");
+    	getMovieInfo(userInput[3]);
     	break;
 
     default:
@@ -278,6 +279,87 @@ function getSongInfo(songName) {
 // need this code for the spotify query to work
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
+
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------
+// need this code for the omdb query to work
+
+// movie-this ... node liri.js movie-this '<movie name here>' ... will show the following information about the movie in the command line view
+	// * Title of the movie.
+	// * Year the movie came out.
+	// * IMDB Rating of the movie.
+	// * Rotten Tomatoes Rating of the movie.
+	// * Country where the movie was produced.
+	// * Language of the movie.
+	// * Plot of the movie.
+	// * Actors in the movie.
+	// Default to Mr. Nobody if no movie information added by the user
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------
+
+function getMovieInfo(movieName) {
+
+	// adding request npm package functions to the node.js app for omdb api call usage
+	var request = require('request');
+	
+	// check if the user added a movie to search for in the command line
+	if (movieName === undefined) {
+
+		movieName = "Mr. Nobody";
+	}
+	
+	// setup url to query omdb api
+	var url = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=40e9cece";
+		
+	request(url, function (error, response, body) {
+		
+		if (!error && response.statusCode === 200) {
+
+			// console.log('body:', body); // Print the response back from the api request.
+			
+			var rottenRating;
+			// Loop through ratings array and check for the rotten tomatoes 
+			for (var i = 0; i < JSON.parse(body).Ratings.length; i++) {
+				// console.log(JSON.parse(body).Ratings[i]);
+				if (JSON.parse(body).Ratings[i].Source === "Rotten Tomatoes") {
+
+					rottenRating = JSON.parse(body).Ratings[i].Value
+					break;
+				}
+			}
+
+			// check to see if the body has a rotten tomatoes rating for it
+			if (rottenRating === undefined) {
+				rottenRating = "N/A";
+			}
+
+			console.log("----------------------------------------------------------------------------------");
+			// Parse the body of the api request and recover the info needed to output
+			console.log("Title:           " + JSON.parse(body).Title);
+			console.log("Release Year:    " + JSON.parse(body).Year);
+			console.log("IMDB Rating:     " + JSON.parse(body).imdbRating);
+			console.log("Rotten Tomatoes: " + rottenRating);
+			console.log("Country:         " + JSON.parse(body).Country);
+			console.log("Language:        " + JSON.parse(body).Language + "\n");
+			console.log("Plot:   " + JSON.parse(body).Plot + "\n");
+			console.log("Actors: " + JSON.parse(body).Actors);
+			console.log("----------------------------------------------------------------------------------");
+			
+		} else {
+
+			console.log('error:', error); // Print the error if one occurred
+			console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+
+		}
+
+	});
+
+}
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------
+// need this code for the omdb query to work
+// ----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
