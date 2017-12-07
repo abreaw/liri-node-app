@@ -2,13 +2,15 @@
 
 // app will take in the following type of commands from the user (command line)
 
-// my-tweets 			node liri.js my-tweets
+// my-tweets 			node liri.js my-tweets '<twitter screen name (optional)>'
 // spotify-this-song	node liri.js spotify-this-song '<song name here>'
 // movie-this			node liri.js movie-this '<movie name here>'
 // do-what-it-says		node liri.js do-what-it-says
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
+// grab npm package that will be needed to run this node.js app
+var cmdlog = require("fs");		// needed for file write to log
 
 // Gets the twitter key info from the keys.js file
 var keyInfo = require("./keys.js");
@@ -18,7 +20,6 @@ var userInput = process.argv;
 
 // call function to check / execute the right commands passed in by the user
 executeLIRICommand(userInput[2], userInput[3]);
-
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,12 +60,13 @@ function executeLIRICommand(cmdType, titleInfo) {
 // need this code for the twitter status information
 
 // my-tweets ... will show your last 20 tweets and when they were created in gitbash (cmd line interface)
-
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
 function getTwitterStatus() {
 
 	var Twitter = require("twitter");	// needed to use the twitter package to get last 20 tweets
+
+	var twitterInfo = "";
 
 	// create new client session w/ Twitter and use keys.js info from test account
 	var client = new Twitter({
@@ -78,13 +80,17 @@ function getTwitterStatus() {
 	// var params = {screen_name: 'nodejs'};	// using the default account information from the npm documentation
 	var params = {screen_name: 'BtTest1117'};  // using my test account information
 
+	if (userInput[3] != undefined) {
+		params.screen_name = userInput[3];
+	}
+
 	// use the Twitter client to get the latest tweets from the user account
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
 	  if (!error) {
 	
-		console.log("----------------------------------------------------------------------------------");
-		console.log("Latest Tweets for ***" + params.screen_name + "***");
-		console.log("----------------------------------------------------------------------------------");
+		twitterInfo += "----------------------------------------------------------------------------------\n";
+		twitterInfo += "Latest Tweets for ***" + params.screen_name + "***\n";
+		twitterInfo += "----------------------------------------------------------------------------------\n";
 		
 		// create a variable to limit the tweet output to 20
 		var loopLimit;
@@ -100,17 +106,30 @@ function getTwitterStatus() {
 		// loop through tweets information and process to screen
 	    for (var i = 0; i < loopLimit; i++) {
 	    
-	    	console.log("\"" + tweets[i].text + "\"");	// test array dot notation to grab tweets from get function call
-			console.log("    Tweeted on: " + tweets[i].created_at);	// test array dot notation to grab tweets from get function call
-			console.log("----------------------------------------------------------------------------------");
-	    }
+	    	twitterInfo += "\"" + tweets[i].text + "\"\n";	// test array dot notation to grab tweets from get function call
+			twitterInfo += "    Tweeted on: " + tweets[i].created_at + "\n";	// test array dot notation to grab tweets from get function call
+			twitterInfo += "----------------------------------------------------------------------------------\n";
+
+		}
 
 	  } else {
 
-	  	console.log("Issue getting the latest tweets, please try back later.");
+	  	twitterInfo += "Issue getting the latest tweets, please try back later.\n";
 
 	  }
+
+	  	// have to have it within the .get function so it has all the information before it processes the statement
+	  	console.log(twitterInfo);
+
+	  	// log twitter output to log file created
+	  	cmdlog.appendFile('liri-log.txt', userInput[2] + " " + userInput[3] + "\n" + twitterInfo, 'utf8', function (err) {
+	  		if (err) {
+	  			console.log("Error logging request to file");
+	  		}
+	  	});
+
 	});
+
 
 }
 
@@ -130,6 +149,8 @@ function getSongInfo(songName) {
 	// adding spotify npm package functions to the node.js app for use
 	var Spotify = require('node-spotify-api');
 
+	var spotifyInfo = "";
+
 	// using documentation from npm package to setup the new Spotify object
 	var spotify = new Spotify({
 		id: 'd4df910b75c3467e80e7e5628d46c06c',
@@ -139,20 +160,41 @@ function getSongInfo(songName) {
 	// if user does not add a song title to search for then app will add one for them in the search query request
     if (songName === undefined) {
 
-		console.log("No song to look up so here is one for you ... ");
+		spotifyInfo += "No song to look up so here is one for you ... \n";
+		console.log(spotifyInfo);
 		songName = "The Sign";
 	}
 
 	spotify.search({ type: 'track', query: songName }, function(err, data) {
 		if (err) {
-			return console.log('Error occurred: ' + err);
+			
+			spotifyInfo += 'Error occurred: ' + err + "\n";
+			cmdlog.appendFile('liri-log.txt', userInput[2] + " " + userInput[3] + "\n" + spotifyInfo, 'utf8', function (err) {
+				if (err) {
+					console.log("Error logging request to file");
+				}
+			});
+
+			return console.log(spotifyInfo);
+
+		} else if (data.tracks.items.length === 0) {
+
+			spotifyInfo += "No songs available with the title \"" + songName + "\"\n";
+
+			cmdlog.appendFile('liri-log.txt', userInput[2] + " " + userInput[3] + "\n" + spotifyInfo, 'utf8', function (err) {
+				if (err) {
+					console.log("Error logging request to file");
+				}
+			});
+
+			return console.log(spotifyInfo);
 		}
 
 		// added this JSON.stringify function to be able to read all the objects / data being returned from the search query above
 		// console.log(JSON.stringify(data, null, 2));
 		// console.log(JSON.stringify(data.tracks.items[0].album, null, 2));
 
-		console.log("there are " + data.tracks.items.length + " items in the response from spotify");
+		// console.log("there are " + data.tracks.items.length + " items in the response from spotify");
 		var spotifySongChoices = [];
 		var isSong = false;
 		var itemIndex;
@@ -217,19 +259,30 @@ function getSongInfo(songName) {
 			
 			}
 
-			console.log("----------------------------------------------------------------------------------");
-			console.log("Artist:    " + artist);
-			console.log("Song Name: " + songTitle);
-			console.log("Album:     " + album);
-			console.log("Check it out at: " + previewLink);
-			console.log("----------------------------------------------------------------------------------");
+			spotifyInfo += "----------------------------------------------------------------------------------\n";
+			spotifyInfo += "Artist:    " + artist + "\n";
+			spotifyInfo += "Song Name: " + songTitle + "\n";
+			spotifyInfo += "Album:     " + album + "\n";
+			spotifyInfo += "Check it out at: " + previewLink + "\n";
+			spotifyInfo += "----------------------------------------------------------------------------------\n";
 
 		} else {
 
-			console.log("isSong = " + isSong);
-			console.log("Could it be one of these?");
-			console.log(spotifySongChoices);
+			// console.log("isSong = " + isSong);
+			spotifyInfo += "No songs titles have a good match to " + songName + "\n";
+			spotifyInfo += "Could it be one of these?\n";
+			spotifyInfo += spotifySongChoices + "\n";
 		}
+
+		// have to have it within the .search function so it has all the information before it processes the statement
+	  	console.log(spotifyInfo);
+
+	  	// log spotify output to log file created
+	  	cmdlog.appendFile('liri-log.txt', userInput[2] + " " + userInput[3] + "\n" + spotifyInfo, 'utf8', function (err) {
+	  		if (err) {
+	  			console.log("Error logging request to file");
+	  		}
+	  	});
 
 	});
 
@@ -258,6 +311,8 @@ function getMovieInfo(movieName) {
 
 	// adding request npm package functions to the node.js app for omdb api call usage
 	var request = require('request');
+
+	var movieInfo = "";
 	
 	// check if the user added a movie to search for in the command line
 	if (movieName === undefined) {
@@ -269,45 +324,69 @@ function getMovieInfo(movieName) {
 	var url = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=40e9cece";
 		
 	request(url, function (error, response, body) {
+
+		// console.log("error: " + error);
+		// console.log("response: " + JSON.stringify(response, null, 2));
+		// console.log('body:', body); // Print the response back from the api request.
+
+		// console.log(response.statusCode);
+
+		var err = JSON.parse(body).Response;
+		var errMsg = JSON.parse(body).Error;
+		var isError = false;
+
+		// console.log(err);
+		// console.log(errMsg);
+
+		if (err === "False" || errMsg === "Movie not found!") {
+			isError = true;
+		}
 		
-		if (!error && response.statusCode === 200) {
+		if (!isError) {
 
-			// console.log('body:', body); // Print the response back from the api request.
-			
 			var rottenRating;
-			// Loop through ratings array and check for the rotten tomatoes 
-			for (var i = 0; i < JSON.parse(body).Ratings.length; i++) {
-				// console.log(JSON.parse(body).Ratings[i]);
-				if (JSON.parse(body).Ratings[i].Source === "Rotten Tomatoes") {
 
-					rottenRating = JSON.parse(body).Ratings[i].Value
-					break;
+			// if (JSON.parse(body).Ratings)
+				// Loop through ratings array and check for the rotten tomatoes 
+				for (var i = 0; i < JSON.parse(body).Ratings.length; i++) {
+					// console.log(JSON.parse(body).Ratings[i]);
+					if (JSON.parse(body).Ratings[i].Source === "Rotten Tomatoes") {
+
+						rottenRating = JSON.parse(body).Ratings[i].Value
+						break;
+					}
 				}
-			}
 
 			// check to see if the body has a rotten tomatoes rating for it
 			if (rottenRating === undefined) {
 				rottenRating = "N/A";
 			}
 
-			console.log("----------------------------------------------------------------------------------");
+			movieInfo += "----------------------------------------------------------------------------------\n";
 			// Parse the body of the api request and recover the info needed to output
-			console.log("Title:           " + JSON.parse(body).Title);
-			console.log("Release Year:    " + JSON.parse(body).Year);
-			console.log("IMDB Rating:     " + JSON.parse(body).imdbRating);
-			console.log("Rotten Tomatoes: " + rottenRating);
-			console.log("Country:         " + JSON.parse(body).Country);
-			console.log("Language:        " + JSON.parse(body).Language + "\n");
-			console.log("Plot:   " + JSON.parse(body).Plot + "\n");
-			console.log("Actors: " + JSON.parse(body).Actors);
-			console.log("----------------------------------------------------------------------------------");
+			movieInfo += "Title:           " + JSON.parse(body).Title +"\n";
+			movieInfo += "Release Year:    " + JSON.parse(body).Year + "\n";
+			movieInfo += "IMDB Rating:     " + JSON.parse(body).imdbRating + "\n";
+			movieInfo += "Rotten Tomatoes: " + rottenRating + "\n";
+			movieInfo += "Country:         " + JSON.parse(body).Country + "\n";
+			movieInfo += "Language:        " + JSON.parse(body).Language + "\n\n";
+			movieInfo += "Plot:   " + JSON.parse(body).Plot + "\n\n";
+			movieInfo += "Actors: " + JSON.parse(body).Actors + "\n";
+			movieInfo += "----------------------------------------------------------------------------------\n";
 			
 		} else {
 
-			console.log('error:', error); // Print the error if one occurred
-			console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-
+			movieInfo += 'error:', JSON.parse(body).Error + "\n"; // Print the error if one occurred
 		}
+
+		console.log(movieInfo);
+
+		// log movie output to log file created
+	  	cmdlog.appendFile('liri-log.txt', userInput[2] + " " + userInput[3] + "\n" + movieInfo, 'utf8', function (err) {
+	  		if (err) {
+	  			console.log("Error logging request to file");
+	  		}
+	  	});
 
 	});
 

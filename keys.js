@@ -1,5 +1,5 @@
 // show that the keys file has been loaded
-console.log('this is loaded');
+// console.log('this is loaded');
 
 // add the real twitter key information here to access the test twitter account
 // https://apps.twitter.com/app/14539797/keys (BTTest117 account)
